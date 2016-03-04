@@ -1,7 +1,8 @@
 # Soccer Type Provider
 
   Provides typed access to soccer tables, teams and statistics from the [BBC Sports website.][2]  
-  Inspired by [Phil Trelford's demo of the HTML Type provider][1]
+  Inspired by [Phil Trelford's demo of the HTML Type provider.][1]  
+  Please use msbuild via Visual Studio or equiv., yet to implement FAKE.
 
 ## Getting started
 
