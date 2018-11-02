@@ -7,9 +7,13 @@ open FootballTypeProvider.Types
 let teamName = "team-name"
 let dataTeamSlug = "data-team-slug"
 let codeToUrl = sprintf @"http://www.bbc.co.uk/sport/football/tables/partial/%d?structureid=5"
+
 let results() = HtmlDocument.Load("http://www.bbc.co.uk/sport/football/tables")
+
 let statFields = [ "Won"; "Lost"; "Drawn"; "Played"; "Position"; "For"; "Against"; "Goal-difference"; "Points" ]
+
 let directionOfMoveLabel = "Direction of Move"
+
 let last10GamesLabel = "Last10Games"
 
 let groupLeagueMap() : Map<string, Map<string, string>> = 
@@ -22,18 +26,26 @@ let groupLeagueMap() : Map<string, Map<string, string>> =
             |> Map.ofSeq))
     |> (Seq.cache >> Map.ofSeq)
 
-let retrieveGroupNames() = 
-    groupLeagueMap()
-    |> Map.toSeq
-    |> Seq.map fst
-    |> Seq.fold (fun state group -> String.Concat(group, "\n", state)) String.Empty
+let leaguesCups = HtmlDocument.Load("http://www.bbc.co.uk/sport/football/leagues-cups")
+
+let leaguesCupsList() =
+    let baseHtmlDocumentContent = leaguesCups
+    baseHtmlDocumentContent.CssSelect ("ul[data-reactid] a")
+    |> Seq.map (fun node -> (node.AttributeValue("href"), node.DirectInnerText()))
+    |> Seq.sortBy(fun (_, name) -> name)
+
+let retrieveGroupNames() =
+    leaguesCupsList()
+    
+    |> Seq.fold (fun state group -> String.Concat(snd group, "\n", state)) String.Empty
 
 let getLeaguesForGroup group () = 
-    let allGroups = groupLeagueMap()
-    allGroups.Item(group)
-    |> Map.toSeq
-    |> Seq.map fst
-    |> List.ofSeq
+    ["league1"; "league2"]
+    //let allGroups = groupLeagueMap()
+    //allGroups.Item(group)
+    //|> Map.toSeq
+    //|> Seq.map fst
+    //|> List.ofSeq
 
 let stripValue (nodeList : seq<HtmlNode>) = 
     nodeList
@@ -47,7 +59,8 @@ let nab a b = not (a = b)
 let retrieveTeams leagueName groupName () = 
     let url = 
         let leagueSourceMap = groupLeagueMap().Item(groupName)
-        int (leagueSourceMap.Item(leagueName)) |> codeToUrl
+        //int (leagueSourceMap.Item(leagueName)) |> codeToUrl
+        "https://www.bbc.co.uk/sport/football/championship/table"
     
     let stripValue (a : seq<HtmlNode>) = 
         a
@@ -56,31 +69,20 @@ let retrieveTeams leagueName groupName () =
     
     let source = HtmlDocument.Load url
     let filterTeamSlug = Seq.filter (fun (e : HtmlNode) -> e.TryGetAttribute(dataTeamSlug) |> Option.isSome)
-    (source.Descendants [ "tr" ]
-     |> filterTeamSlug
-     |> Seq.map (fun t -> t.Descendants(fun e -> e.HasClass(teamName)) |> stripValue)
-     |> List.ofSeq, 
-     source.Descendants [ "tr" ]
-     |> filterTeamSlug
-     |> Seq.map (fun nodes -> 
-            ({ TeamName = (nodes.Descendants(fun e -> e.HasClass(teamName)) |> stripValue)
+    (["1"], 
+     [
+            ({ TeamName = "Yeading AFC"
                Position = 
-                   let spans = 
-                       nodes.Descendants(fun e -> e.HasClass("position"))
-                       |> Seq.map (fun e -> e.Descendants [ "span" ] |> Seq.map (fun e -> e.InnerText()))
-                       |> Seq.concat
-                   { DirectionOfMove = (Seq.head spans)
-                     PositionValue   = int (Seq.last spans) }
-               Played         = extractClassNamed "played" nodes
-               Won            = extractClassNamed "won" nodes
-               Drawn          = extractClassNamed "drawn" nodes
-               Lost           = extractClassNamed "lost" nodes
-               Pro            = extractClassNamed "for" nodes
-               Against        = extractClassNamed "against" nodes
-               GoalDifference = extractClassNamed "goal-difference" nodes
-               Points         = extractClassNamed "points" nodes
-               Last10Games    = 
-                   nodes.Descendants [ "li" ]
-                   |> Seq.map (fun d -> d.AttributeValue("title"))
-                   |> Array.ofSeq }))
-     |> List.ofSeq)
+                   
+                   { DirectionOfMove = "up"
+                     PositionValue   = 10}
+               Played         = 1
+               Won            = 1
+               Drawn          = 1
+               Lost           = 1
+               Pro            = 1
+               Against        = 1
+               GoalDifference = 1
+               Points         = 1
+               Last10Games    = [|"Game1";"Game2"|]})])
+     

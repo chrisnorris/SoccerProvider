@@ -9,7 +9,7 @@ open FootballTypeProvider.TypeFactory
 
 [<TypeProvider>]
 type FootballTypeProvider(config : TypeProviderConfig) as this = 
-    inherit TypeProviderForNamespaces()
+    inherit TypeProviderForNamespaces(config)
     let namespaceName = "FootballTeams.TypeProvider"
     let providerName = "FootballTypeProvider"
     let asm = Assembly.GetExecutingAssembly()
@@ -17,7 +17,7 @@ type FootballTypeProvider(config : TypeProviderConfig) as this =
     
     let createTypes() = 
         let footballType = 
-            ProvidedTypeDefinition(asm, namespaceName, providerName, Some typeof<obj>, HideObjectMethods = true)
+            ProvidedTypeDefinition(asm, namespaceName, providerName, Some typeof<obj>, hideObjectMethods = true)
         let parameters = [ ProvidedStaticParameter("Group", typeof<string>, String.Empty) ]
         do footballType.DefineStaticParameters(parameters, 
                                                (fun typeName parameterValues -> 
@@ -32,8 +32,8 @@ type FootballTypeProvider(config : TypeProviderConfig) as this =
         let innerState = 
             let groupNames = retrieveGroupNames()
             ProvidedProperty
-                ("AvailableGroups", typeof<string>, IsStatic = true, 
-                 GetterCode = fun _ -> <@@ ((groupNames) :> obj) :?> string @@>)
+                ("AvailableGroups", typeof<string>, isStatic = true, 
+                 getterCode = fun _ -> <@@ ((groupNames) :> obj) :?> string @@>)
         footballType.AddMember(innerState)
         [ footballType ]
     

@@ -10,10 +10,19 @@ Introducing your project
 Say more
 
 *)
-#r "SoccerTypeProvider.dll"
-open SoccerTypeProvider
+#r @"C:\Git\fsharp\SoccerProvider\src\SoccerTypeProvider\bin\Debug\SoccerTypeProvider.dll"
+#r @"C:\Git\fsharp\SoccerProvider\src\SoccerTypeProvider\bin\Debug\FSharp.Data.dll"
 
-Library.hello 0
-(**
-Some more info
-*)
+open FootballTeams.TypeProvider
+
+
+FootballTypeProvider.AvailableGroups
+
+
+
+open System
+open FSharp.Data
+
+type Football = FootballTypeProvider<Group="English">
+
+Football.Leagues

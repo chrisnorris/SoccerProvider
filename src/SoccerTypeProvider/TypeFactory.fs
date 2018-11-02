@@ -17,11 +17,11 @@ let buildLeaguesAndTeamStats groupName league =
                              let directionOfMove = team.Position.DirectionOfMove
                              let last10Games = team.Last10Games
                              [ ProvidedProperty
-                                   (propertyName = directionOfMoveLabel, propertyType = typeof<string>, IsStatic = true, 
-                                    GetterCode = (fun _ -> <@@ directionOfMove @@>)) ] 
+                                   (propertyName = directionOfMoveLabel, propertyType = typeof<string>, isStatic = true, 
+                                    getterCode = (fun _ -> <@@ directionOfMove @@>)) ] 
                              @ [ ProvidedProperty
-                                     (propertyName = last10GamesLabel, propertyType = typeof<string []>, IsStatic = true, 
-                                      GetterCode = (fun _ -> <@@ last10Games @@>)) ] 
+                                     (propertyName = last10GamesLabel, propertyType = typeof<string []>, isStatic = true, 
+                                      getterCode = (fun _ -> <@@ last10Games @@>)) ] 
                                @ [ for propertyTuple in (statFields 
                                                          |> List.zip 
                                                                 [ team.Won; team.Lost; team.Drawn; team.Played; 
@@ -30,12 +30,12 @@ let buildLeaguesAndTeamStats groupName league =
                                        let propertyValue = fst propertyTuple
                                        yield ProvidedProperty
                                                  (propertyName = snd propertyTuple, propertyType = typeof<int>, 
-                                                  IsStatic = true, GetterCode = (fun args -> <@@ propertyValue @@>)) ])
+                                                  isStatic = true, getterCode = (fun args -> <@@ propertyValue @@>)) ])
                          teamType))
     leagueType
 
 let buildLeagues groupName () = 
-    let nestedType = ProvidedTypeDefinition("Leagues", Some typeof<obj>, HideObjectMethods = true)
+    let nestedType = ProvidedTypeDefinition("Leagues", Some typeof<obj>, hideObjectMethods = true)
     nestedType.AddMembersDelayed(fun () -> 
         let leagues = getLeaguesForGroup groupName ()
         leagues |> List.map (buildLeaguesAndTeamStats groupName))
